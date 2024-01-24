@@ -1,0 +1,27 @@
+//HTTP headers
+
+URL/I/N uniform resource locator/identity/name 
+headers :HTTP headers let the client and the server pass additional information with an HTTP request or response. 
+headers contain meta data in key: value pairs
+used for caching, authentication, state management
+
+request headers: from client
+response headers: from server
+representation headers:encoding /compression for heavy apps like zerodha which requires huge volumes of data
+payload headers: data 
+//check headers while using POSTMAN requests
+
+HTTP Methods- GET-retrieve a resource 
+PUT-replace a resource
+POST-interact with resource
+DELETE-remove a resource
+PATCH-change a part of a resource
+Extra methods- HEADE, OPTIONS, TRACE
+
+STATUS CODE
+1XX-informational, 2XX-SUCCESS, 3XX-REDIRECTION 4XX-CLIENT ERROR 5XX- SERVER ERROR
+100-continue, 102-processing
+200-ok, 201-created, 202-accepted
+307-temporary redirect, 308-permanenet redirect
+400-bad request, 401-unauthorized, 402-payment required, 404-not found
+500-internal server error, 504-gateaway timeout
