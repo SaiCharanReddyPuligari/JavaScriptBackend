@@ -16,4 +16,14 @@ app.use(express.urlencoded({extended: true, limit: '16kb'}))  //accepting the di
 app.use(express.static("public")) //static middleware store the files, images locally
 app.use(cookieParser())
 
-export { app };
+//importing routers
+
+import userRouter from "./routes/user.routes.js";
+
+//router decalration
+//while writing in index file we use methods directly like app.get
+//since we are exporting the routes, we use app.us
+
+app.use("/api/v1/users", userRouter);
+
+export  default app ;
