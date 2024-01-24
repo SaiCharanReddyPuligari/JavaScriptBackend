@@ -1,6 +1,8 @@
 import express, { urlencoded } from "express";
 import cookieParser from "cookie-parser";
-import cors from "cors";
+import cors from "cors"; 
+//cross-origin resource sharing (CORS) enables secure communication between applications hosted on different origins
+//Also helps in securing the server by restrcieting methods, and requests like only HTTPS, GET, POST
 
 const app = express();
 
