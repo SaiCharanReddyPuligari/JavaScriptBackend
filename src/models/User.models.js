@@ -52,7 +52,7 @@ const userSchema= new mongoose.Schema(
 //Pre hook to perform an operation before save, like encrypting a password
 userSchema.pre("save", async function(next){ //always use function, as we use this reference for mongo models
     if(!this.isModified("password")) return;          //we encrypt only once when password is created or is modified
-    this.password= bcrypt.hash(this.password, 10);
+    this.password= await bcrypt.hash(this.password, 10);
     next();
 })
 
