@@ -19,7 +19,7 @@ const userSchema= new mongoose.Schema(
         lowercase: true, 
         trim: true,   
        },
-       fullname:{
+       fullName:{
         type: String,
         required: true,
         trim: true,   
@@ -61,7 +61,7 @@ userSchema.methods.isPasswordCorret = async function(password){
    return await bcrypt.compare(password, this.password)
 }
 
-userSchema.methods.generateAcessToken = function(){
+userSchema.methods.generateAcessToken = function(){ //expires in short duration
     jwt.sign(
         {                        //payload 
            _id: this._id,
@@ -75,7 +75,7 @@ userSchema.methods.generateAcessToken = function(){
         }
     )
 }
-userSchema.methods.generateRefreshToken = function(){
+userSchema.methods.generateRefreshToken = function(){ //expires in long duration //we keep in memory(DB)
     jwt.sign(
         {                        //payload 
            _id: this._id,
