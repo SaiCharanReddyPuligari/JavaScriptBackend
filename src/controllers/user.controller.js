@@ -8,13 +8,15 @@ import { APIResponse } from "../utils/APIResponse.js";
 const generateAccessAndRefreshTokens= async (userId)=>{
   try {
       const user = await User.findById(userId);
+    
       const accessToken= user.generateAcessToken()
       const refreshToken= user.generateRefreshToken()
 
       user.refreshToken = refreshToken;
       user.save({validateBeforeSave: false});  //save to database
       //we add validateBeforeSave to untrigger the mongoose password check
-      
+      // console.log(user);
+
       return {accessToken, refreshToken}
   } catch (error) {
     throw new APIError(500, "something went wrong while generating refresh and access tokens")
@@ -23,7 +25,7 @@ const generateAccessAndRefreshTokens= async (userId)=>{
 const registerUser = asyncHandler(async (req, res) => {
   //get user from frontend
   const { fullName, email, username, password } = req.body;
-  //   console.log({ email: email });
+    console.log({ email: email });
 
   //validating multiple values at a time
   if (
@@ -99,8 +101,13 @@ const loginUser= asyncHandler(async (req, res)=>{
     //generate access and refresh token
     //send cookies
 
-    const {email, username, password}= req.body
+    const { email, username, password }  = req.body;
+    console.log({email: email});
 
+    // if(!username && !email){ //alternate
+    // throw new APIError(400, "username or email is required")
+
+    // }
     if(!(username || email)){ //you can choose one or both
       throw new APIError(400, "username or email is required")
     }
@@ -168,6 +175,7 @@ const logoutUser= asyncHandler(async (req, res)=>{
               .json(new APIResponse(200, {}, "User logged out"))
 })
 
+//once refreshtoken is created, we need to refresh it and give it on every request to keep the session open
 
 export { 
   registerUser,

@@ -62,7 +62,7 @@ userSchema.methods.isPasswordCorret = async function(password){
 }
 
 userSchema.methods.generateAcessToken = function(){ //expires in short duration
-    jwt.sign(
+    return jwt.sign(
         {                        //payload 
            _id: this._id,
            email: this.email,
@@ -76,7 +76,7 @@ userSchema.methods.generateAcessToken = function(){ //expires in short duration
     )
 }
 userSchema.methods.generateRefreshToken = function(){ //expires in long duration //we keep in memory(DB)
-    jwt.sign(
+    return jwt.sign(
         {                        //payload 
            _id: this._id,
         },
