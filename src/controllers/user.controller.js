@@ -45,7 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //check for images, and avatar
   const avatarLocalPath = req.files?.avatar[0]?.path;   //req.files gives an array with one object with path parameter, so we use avatar[0].path
-  //const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  //const coverImageLocalPath = req.files?.coverImage[0]?.path; 
 
    //for optional images
    let coverImageLocalPath;
@@ -254,7 +254,6 @@ const getCurrentUser= asyncHandler(async (req, res)=>{
             .json(200,req.user, "current user fetched successfully" )
 })
 
-//try to write different controllers for updating files
 const updateAccountDetails= asyncHandler(async(req, res)=>{
     
   const {fullName, email} = req.body;
@@ -278,12 +277,15 @@ const updateAccountDetails= asyncHandler(async(req, res)=>{
            .json(new APIResponse(200, user, "Account details updated successfully"))
 })
 
+//try to write different controllers for updating files
 const updateUserAvatar = asyncHandler (async(req, res)=>{
   const avatarLocalPath= req.file?.path;
 
   if(!avatarLocalPath){
     throw new APIError(400, "avatar file is missing")
   }
+
+  //deleting the avatar on Cloudinary
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if(!avatar.url){
@@ -305,7 +307,6 @@ const updateUserAvatar = asyncHandler (async(req, res)=>{
            .json(new APIResponse(200, user, "Avatar updated successfully"))
 
 })
-
 const updateUserCoverImage = asyncHandler (async(req, res)=>{
   const coverImageLocalPath= req.file?.path;
 
@@ -334,6 +335,86 @@ const updateUserCoverImage = asyncHandler (async(req, res)=>{
 
 })
 
+const getUserChannelProfile= asyncHandler (async(req, res)=>{
+  //to access the profile we make a getrequest to the profile path, so we use req.params
+
+    const {username}= req.params;
+
+    if(!username?.trim()){
+      throw new APIError(400, "User not found");
+    }
+//the general process is to make a User.find and then apply the aggregation principles
+//mongo offers $match to do the seacrh and apply the methods concurrently
+//User.aggregate([{}, {}])/flower brackets indicate the pipelines, and can be any
+     const channel= await User.aggregate(
+      [
+        {
+          $match:{
+            username: username?.toLowerCase()  //found the profle we are looking for
+          }
+        },
+        {
+          $lookup:{
+            from:"subscriptions", //plural name stored in database
+            localField: "_id",
+            foreignField: "channel",
+            as: "subscribers"
+          }
+        },
+        {
+          $lookup:{
+            from:"subscriptions", //plural name stored in database
+            localField: "_id",
+            foreignField: "subscriber",
+            as: "subscribedTo"
+          }
+        },
+        {
+          $addFields:{
+            subscribersCount: {
+              $size: "$subscribers"  //returns the size of the resultant subscribers array
+            },
+            subscribedTo: {
+              $size: "$subscribedTo"
+            },
+            isSubscribed:{
+              $cond:{
+                if: {$in: [req.user?._id, "$subscribers.subscriber"]}, 
+                //with if to assign check and with $in we check if the current user is present in the subscibers, we display {subscribed} buttton in the front end or else {subscribe}
+                then: true,  //the front-end can use the then and else to check it
+                else: false
+              }
+            }
+          }
+        },
+        {
+          $project:{
+            fullName: 1,  //we can project only the required values to frontend
+            username: 1,
+            subscribersCount: 1,
+            subscribedTo: 1,
+            isSubscribed: 1,
+            avatar: 1,
+            coverImage: 1,
+            email: 1
+          }
+        }
+      ]
+     )
+     //channel is an array of objects (here it is of one user only)
+     
+     if(!channel?.length){
+      throw new APIError(404, "channel does not exist")
+     }
+
+    return res
+           .status(200)
+           .json(
+            new APIResponse(200, channel[0], "User channel fetched successfully")
+           )
+
+})
+
 export { 
   registerUser,
   loginUser,
@@ -343,5 +424,6 @@ export {
   getCurrentUser,
   updateAccountDetails,
   updateUserAvatar,
-  updateUserCoverImage
+  updateUserCoverImage,
+  getUserChannelProfile,
  };
