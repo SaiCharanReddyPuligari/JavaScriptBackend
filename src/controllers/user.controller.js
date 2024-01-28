@@ -4,7 +4,6 @@ import { User } from "../models/User.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import jwt from "jsonwebtoken";
-import { mongo } from "mongoose";
 
 
 const generateAccessAndRefreshTokens= async (userId)=>{
@@ -422,7 +421,7 @@ const getUserChannelProfile= asyncHandler (async(req, res)=>{
 const getWatchHistory= asyncHandler (async(req, res)=>{
 
      const user= await User.aggregate([
-      {
+      { 
         $match: {
           //_id: req.user._id  //this returns a string not the id, but for normal methods, mongoose internally converts
           //and here we cannot use it 
