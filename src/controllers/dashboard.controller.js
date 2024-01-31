@@ -41,6 +41,28 @@ const getChannelStats = asyncHandler(async (req, res) => {
             as: "likes"
            }
         },
+        {
+            $project: {
+                totalLikes: {
+                    $size: "$likes"
+                },
+                totalViews: "$views",
+                totalVideos: 1
+            }
+        }, 
+        {
+            $group: {
+                totalLikes: {
+                    $sum: "$totalLikes"
+                },
+                totalViews: {
+                    $sum: "$totalViews"
+                }, 
+                totalVideos: {
+                    $sum: 1
+                }
+            }
+        }
 
     ])
     
@@ -53,7 +75,22 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     const channelVideos = await Video.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(req.user._id)
+                owner: new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localfield: "_id",
+                foreignfield: "video",
+                as: "likes"
+            }
+        }, 
+        {
+            $addFields: {
+                totalLikes: {
+                    $sum
+                }
             }
         }
     ])
