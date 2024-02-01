@@ -68,6 +68,52 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 const getPlaylistById = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
     //TODO: get playlist by id
+
+    if(!isValidObjectId(playlistId)){
+        throw new APIError(404, "this playlist does not exist")
+    }
+
+    const playlistById = await Playlist.aggregate([
+        {
+            $match: {
+                id: new mongoose.Types.ObjectId(playlistId)
+            }
+        }, 
+        {
+            $lookup: {
+                from : "videos",
+                localField: "video",
+                foreignField: "_id",
+                as: "videos"
+            }
+        },
+        {
+           $match: {
+            "videos.isPublished": true,
+           }
+        },
+        {
+            $lookup: {
+                from : "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner"
+            }
+        },
+        {
+            $addFields: {
+                totalVideos: {
+                    $size: "$videos"
+                },
+                totalViews: {
+                    $sum: "$videos.views"
+                }, 
+                owner: {
+                    $first: "$owner"
+                }
+            }
+        }
+    ])
 })
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {

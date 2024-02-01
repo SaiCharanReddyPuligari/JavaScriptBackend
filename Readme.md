@@ -1,11 +1,11 @@
 ## YouTube Backend
 **Backend with JavaScript and frameworks**
 
-This is a `JavaScript Backend project` to understand the functionalities of `MongoDB` `Node.js` `Express.js` in detail.
+This is a `JavaScript Backend project` to understand the functionalities of `MongoDB` `Express.js` `Node.js` in detail.
 
 ---
 
-Here are the key points of how I used the `MERN` stack and `NPM` packages to build it.
+Here are the key points of how I used the `MEN` stack and `NPM` packages to build it.
 
 - Node.js for the backend code and running the Express server inside the node.js environment. 
 - MongoDB to store the data using CURD principles and retrieve the required data with aggregation pipelines. 
@@ -16,8 +16,8 @@ Here are the key points of how I used the `MERN` stack and `NPM` packages to bui
 |---   |---   |
 |API Documentation| Link| -->
 
-#### Tech Stack:
->Node.js, MongoDB, Express.js, Cloudinary
+### Tech Stack:
+### Node.js, MongoDB, Express.js, Cloudinary
 
 
 #### User Management:

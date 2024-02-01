@@ -1,7 +1,6 @@
 import mongoose from "mongoose"
  import {Video} from "../models/Video.models.js"
 import  {Comment} from "../models/comment.models.js"
-import {ApiError} from "../utils/APIError.js"
 import {APIResponse, ApiResponse} from "../utils/APIResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { APIError } from "../utils/APIErrors.js"
@@ -73,8 +72,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
     ])
 
     const options= {
-        page: 1,
-        limit: 10,
+        page,
+        limit
     }
 
     const videoCommentsPaginate= await Comment.aggregatePaginate({
