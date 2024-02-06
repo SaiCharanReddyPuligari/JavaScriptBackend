@@ -127,17 +127,17 @@ const updateComment = asyncHandler(async (req, res) => {
     const { content } = req.body;
 
     if (!content) {
-        throw new ApiError(400, "content is required");
+        throw new APIError(400, "content is required");
     }
 
     const comment = await Comment.findById(commentId);
 
     if (!comment) {
-        throw new ApiError(404, "Comment not found");
+        throw new APIError(404, "Comment not found");
     }
 
     if (comment?.owner.toString() !== req.user?._id.toString()) {
-        throw new ApiError(400, "only comment owner can edit their comment");
+        throw new APIError(400, "only comment owner can edit their comment");
     }
 
     const updatedComment = await Comment.findByIdAndUpdate(
@@ -151,13 +151,13 @@ const updateComment = asyncHandler(async (req, res) => {
     );
 
     if (!updatedComment) {
-        throw new ApiError(500, "Failed to edit comment please try again");
+        throw new APIError(500, "Failed to edit comment please try again");
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200, updatedComment, "Comment edited successfully")
+            new APIResponse(200, updatedComment, "Comment edited successfully")
         );
 })
 
@@ -168,18 +168,18 @@ const deleteComment = asyncHandler(async (req, res) => {
     const comment = await Comment.findById(commentId);
 
     if (!comment) {
-        throw new ApiError(404, "Comment not found");
+        throw new APIError(404, "Comment not found");
     }
 
     if (comment?.owner.toString() !== req.user?._id.toString()) {
-        throw new ApiError(400, "only comment owner can delete their comment");
+        throw new APIError(400, "only comment owner can delete their comment");
     }
 
     await Comment.findByIdAndDelete(commentId);
 
     return res
         .status(200)
-        .json(new ApiResponse(200, {}, "Comment deleted successfully"));
+        .json(new APIResponse(200, {}, "Comment deleted successfully"));
 })
 
 export {
