@@ -4,13 +4,14 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { APIResponse, ApiResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { APIError } from "../utils/APIErrors.js";
 
 const createTweet = asyncHandler(async (req, res) => {
     //TODO: create tweet
     const { content } = req.body;
 
     if (!content) {
-        throw new ApiError(400, `content is required`);
+        throw new APIError(400, `content is required`);
     }
 
     const tweet = await Tweet.create({
@@ -18,7 +19,7 @@ const createTweet = asyncHandler(async (req, res) => {
         owner: req.user?._id,
     });
     if (!tweet) {
-        throw new ApiError(500, `failed to create a tweet`);
+        throw new APIError(500, `failed to create a tweet`);
     }
 
     return res
@@ -30,7 +31,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
     const { userId } = req.params;
 
     if (!isValidObjectId(userId)) {
-        throw new ApiError(400, "Invalid userId");
+        throw new APIError(400, "Invalid userId");
     }
     const userTweets = await Tweet.aggregate([
         {
@@ -95,21 +96,21 @@ const updateTweet = asyncHandler(async (req, res) => {
     const { tweetId } = req.params;
 
     if (!content) {
-        throw new ApiError(400, "content is required");
+        throw new APIError(400, "content is required");
     }
 
     if (!isValidObjectId(tweetId)) {
-        throw new ApiError(400, "Invalid TweetId");
+        throw new APIError(400, "Invalid TweetId");
     }
 
     const tweet = await Tweet.findById(tweetId);
 
     if (!tweet) {
-        throw new ApiError(400, "content is required");
+        throw new APIError(400, "content is required");
     }
 
     if (tweet?.owner.toString() != req.user?._id.toString()) {
-        throw new ApiError(400, "Only owner can update the tweet");
+        throw new APIError(400, "Only owner can update the tweet");
     }
 
     const updateTweet = await findByIdAndUpdate(
@@ -125,36 +126,36 @@ const updateTweet = asyncHandler(async (req, res) => {
     );
 
     if (!updateTweet) {
-        throw new ApiError(500, "Failed to edit tweet please try again");
+        throw new APIError(500, "Failed to edit tweet please try again");
     }
 
     return res
         .status(200)
-        .json(new ApiResponse(200, updateTweet, "Tweet updated successfully"));
+        .json(new APIResponse(200, updateTweet, "Tweet updated successfully"));
 });
 
 const deleteTweet = asyncHandler(async (req, res) => {
     const { tweetId } = req.params;
 
     if (!isValidObjectId(tweetId)) {
-        throw new ApiError(400, "Invalid tweetId");
+        throw new APIError(400, "Invalid tweetId");
     }
 
     const tweet = await Tweet.findById(tweetId);
 
     if (!tweet) {
-        throw new ApiError(404, "Tweet not found");
+        throw new APIError(404, "Tweet not found");
     }
 
     if (tweet?.owner.toString() !== req.user?._id.toString()) {
-        throw new ApiError(400, "only owner can delete thier tweet");
+        throw new APIError(400, "only owner can delete thier tweet");
     }
 
     await Tweet.findByIdAndDelete(tweetId);
 
     return res
         .status(200)
-        .json(new ApiResponse(200, {}, "Tweet deleted successfully"));
+        .json(new APIResponse(200, {}, "Tweet deleted successfully"));
 });
 
 export { createTweet, getUserTweets, updateTweet, deleteTweet };

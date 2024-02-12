@@ -1,36 +1,35 @@
-import mongoose from "mongoose"
- import {Video} from "../models/Video.models.js"
-import  {Comment} from "../models/comment.models.js"
-import {APIResponse, ApiResponse} from "../utils/APIResponse.js"
-import {asyncHandler} from "../utils/asyncHandler.js"
-import { APIError } from "../utils/APIErrors.js"
+import mongoose from "mongoose";
+import { Video } from "../models/Video.models.js";
+import { Comment } from "../models/comment.models.js";
+import { APIResponse, ApiResponse } from "../utils/APIResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { APIError } from "../utils/APIErrors.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
-    //TODO: get all comments for a video
-    const {videoId} = req.params
-    const {page = 1, limit = 10} = req.query
+    const { videoId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
 
     const videoID = await Video.findById(videoId);
 
-    if(!videoID){
-        throw new APIError(400, "video does not exist")
+    if (!videoID) {
+        throw new APIError(400, "video does not exist");
     }
 
     const videoComments = await Comment.aggregate([
         {
-          $match: {
-            //_id: req.user._id  //this returns a string not the id, but for normal methods, mongoose internally converts
-            //and here we cannot use it 
-            video_id: new mongoose.Types.ObjectId(videoID)
-          }
+            $match: {
+                //_id: req.user._id  //this returns a string not the id, but for normal methods, mongoose internally converts
+                //and here we cannot use it
+                video_id: new mongoose.Types.ObjectId(videoID),
+            },
         },
         {
-            $lookup:{
+            $lookup: {
                 from: "users",
                 localField: "owner",
                 foreignField: "_id",
                 as: "owner",
-            }
+            },
         },
         {
             $lookup: {
@@ -38,27 +37,27 @@ const getVideoComments = asyncHandler(async (req, res) => {
                 localField: "_id",
                 foreignField: "comment",
                 as: "likes",
-            }
+            },
         },
         {
-          $addFields: {
-            likesCount:{
-                $size: "$likes"
+            $addFields: {
+                likesCount: {
+                    $size: "$likes",
+                },
+                owner: {
+                    $first: "$owner",
+                },
+                isLikedByUser: {
+                    $cond: {
+                        $if: { $in: [req.user?._id, "$likes.likedBy"] },
+                        then: true,
+                        else: false,
+                    },
+                },
             },
-            owner:{
-                $first: "$owner"
-            },
-            isLikedByUser:{
-                $cond:{
-                    $if:{$in:[req.user?._id, "$likes.likedBy"]},
-                    then: true,
-                    else: false,
-                }
-            }
-          }  
         },
         {
-            $project:{
+            $project: {
                 commentsCount: 1,
                 likesCount: 1,
                 owner: {
@@ -66,63 +65,63 @@ const getVideoComments = asyncHandler(async (req, res) => {
                     fullName: 1,
                     avatar: 1,
                 },
-                isLikedByUser: 1
-            }
-        }
-    ])
+                isLikedByUser: 1,
+            },
+        },
+    ]);
 
-    const options= {
+    const options = {
         page,
-        limit
-    }
+        limit,
+    };
 
-    const videoCommentsPaginate= await Comment.aggregatePaginate({
+    const videoCommentsPaginate = await Comment.aggregatePaginate({
         videoComments,
         options,
-    })
+    });
 
     return res
-           .status(200)
-           .json(
-            new APIResponse(200, videoCommentsPaginate, "video comments fetched successfully")
-           )
-    
-})
+        .status(200)
+        .json(
+            new APIResponse(
+                200,
+                videoCommentsPaginate,
+                "video comments fetched successfully"
+            )
+        );
+});
 
 const addComment = asyncHandler(async (req, res) => {
     // TODO: add a comment to a video
-    const {videoId} = req.params;
-    const {content} = req.body;
+    const { videoId } = req.params;
+    const { content } = req.body;
 
-    if(!content){
-        throw new APIError(400, "add a comment")
+    if (!content) {
+        throw new APIError(400, "add a comment");
     }
 
     const video = await Video.findById(videoId);
 
     if (!video) {
-        throw new ApiError(404, "Video not found");
+        throw new APIError(404, "Video not found");
     }
 
-    const addComment= await Comment.create({
+    const addComment = await Comment.create({
         content: content,
         video: videoId,
-        owner: req.user?._id
-    })
+        owner: req.user?._id,
+    });
 
-    if(!addComment){
-        throw new APIError(500, "Failed to add the comment, please retry")
+    if (!addComment) {
+        throw new APIError(500, "Failed to add the comment, please retry");
     }
 
     return res
-           .status(200)
-           .json(
-            200, new APIResponse("Comment added successfully")
-           )
-})
+        .status(200)
+        .json(200, new APIResponse("Comment added successfully"));
+});
 
 const updateComment = asyncHandler(async (req, res) => {
-
     const { commentId } = req.params;
     const { content } = req.body;
 
@@ -159,7 +158,7 @@ const updateComment = asyncHandler(async (req, res) => {
         .json(
             new APIResponse(200, updatedComment, "Comment edited successfully")
         );
-})
+});
 
 const deleteComment = asyncHandler(async (req, res) => {
     // TODO: delete a comment
@@ -179,12 +178,9 @@ const deleteComment = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new APIResponse(200, {}, "Comment deleted successfully"));
-})
+        .json(
+            new APIResponse(200, { commentId }, "Comment deleted successfully")
+        );
+});
 
-export {
-    getVideoComments, 
-    addComment, 
-    updateComment,
-     deleteComment
-    }
+export { getVideoComments, addComment, updateComment, deleteComment };
