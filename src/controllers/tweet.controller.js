@@ -78,6 +78,18 @@ const getUserTweets = asyncHandler(async (req, res) => {
                 ownerDetails: {
                     $first: "$ownerDetails",
                 },
+                isLiked: {
+                    $cond: {
+                        $if: { $in: [req.user?._id, "$likes.likedBy"] },
+                        then: true,
+                        else: false,
+                    },
+                },
+            },
+        },
+        {
+            $sort: {
+                createdAt: -1,
             },
         },
         {
@@ -86,9 +98,14 @@ const getUserTweets = asyncHandler(async (req, res) => {
                 ownerDetails: 1,
                 likesCount: 1,
                 createdAt: 1,
+                isLiked: 1,
             },
         },
     ]);
+
+    return res
+        .status(200)
+        .json(new APIResponse(200, userTweets, "Tweets fetched successfully"));
 });
 
 const updateTweet = asyncHandler(async (req, res) => {
