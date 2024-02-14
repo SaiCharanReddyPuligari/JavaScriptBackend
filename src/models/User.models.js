@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, {Schema} from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-const userSchema= new mongoose.Schema(
+const userSchema = new Schema(
     {
        username:{
         type: String,
@@ -25,13 +25,19 @@ const userSchema= new mongoose.Schema(
         trim: true,   
         index: true,  
        },
-       avatar:{
-        type: String,  //cloudinary url of image
-        required: true,
-       },
-       coverImage:{
-        type: String, //cloudinary URL
-       },
+       avatar: {
+        type: {
+            public_id: String,
+            url: String //cloudinary url
+            },
+        required: true
+        },
+        coverImage: {
+        type: {
+            public_id: String,
+            url: String //cloudinary url
+            },
+        },
        watchHistory:[ //stores the video and its related content
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -56,9 +62,9 @@ userSchema.pre("save", async function(next){ //always use function, as we use th
     next();
 })
 
-//vaidating the password using mongodb methods
-userSchema.methods.isPasswordCorret = async function(password){
-   return await bcrypt.compare(password, this.password)
+// //vaidating the password using mongodb methods
+userSchema.methods.isPasswordCorret = async function(normalPassword){
+   return await bcrypt.compare(normalPassword, this.password)
 }
 
 userSchema.methods.generateAcessToken = function(){ //expires in short duration
@@ -88,4 +94,7 @@ userSchema.methods.generateRefreshToken = function(){ //expires in long duration
 }
 
 
-export const User= mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema); // Prevent model recompilation
+
+// export const User = mongoose.model("User", userSchema);
+export {User};

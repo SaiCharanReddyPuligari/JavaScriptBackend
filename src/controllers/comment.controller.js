@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Video } from "../models/Video.models.js";
+import { Video } from "../models/video.models.js";
 import { Comment } from "../models/comment.models.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";

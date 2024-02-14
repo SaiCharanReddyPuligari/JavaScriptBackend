@@ -7,8 +7,8 @@ const tweetSchema= new Schema({
     },
     content: {
         type: String,
-        ref
+        required: [true, "content is required"]
     }
 }, {timestamps: true})
 
-export const Tweet= mongoose.model("Tweet", tweetSchema)
+export const Tweet = mongoose.model("Tweet", tweetSchema)

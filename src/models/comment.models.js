@@ -7,7 +7,7 @@ const commentSchema = new Schema({
         required: true,
     },
     video: {
-        types: Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Video"
     },
     owner: {
@@ -16,6 +16,6 @@ const commentSchema = new Schema({
     }
 }, {timestamps: true})
 
-videoSchema.plugin(mongooseAggregatePaginate)
+commentSchema.plugin(mongooseAggregatePaginate)
 
 export const Comment= mongoose.model("Comment", commentSchema)
