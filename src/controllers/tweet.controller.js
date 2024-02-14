@@ -1,8 +1,7 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Tweet } from "../models/tweet.model.js";
 import { User } from "../models/user.model.js";
-import { ApiError } from "../utils/ApiError.js";
-import { APIResponse, ApiResponse } from "../utils/APIResponse.js";
+import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { APIError } from "../utils/APIErrors.js";
 

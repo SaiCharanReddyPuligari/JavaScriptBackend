@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { Video } from "../models/Video.models.js";
 import { Comment } from "../models/comment.models.js";
-import { APIResponse, ApiResponse } from "../utils/APIResponse.js";
+import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { APIError } from "../utils/APIErrors.js";
+import { Like } from "../models/like.models.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
@@ -175,6 +176,11 @@ const deleteComment = asyncHandler(async (req, res) => {
     }
 
     await Comment.findByIdAndDelete(commentId);
+
+    await Like.deleteMany({
+        comment: commentId,
+        likedBy: req.user
+    });
 
     return res
         .status(200)

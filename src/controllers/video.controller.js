@@ -5,7 +5,8 @@ import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { APIError } from "../utils/APIErrors.js";
-import { application } from "express";
+import { Like } from "../models/like.models.js";
+import { Comment } from "../models/comment.models.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -381,7 +382,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     });
 
     //delete the comments
-    await Like.deleteMany({
+    await Comment.deleteMany({
         video: videoId,
     });
 
