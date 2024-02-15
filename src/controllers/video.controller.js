@@ -102,8 +102,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new APIError(400, "Please provide a title and description");
     }
 
-    const videoFileLocalPath = req.file?.videoFile[0]?.path;
-    const thumbnailLocalPath = req.file?.videoFile[0]?.path;
+    const videoFileLocalPath = req.files?.videoFile[0]?.path;
+    const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
 
     if (!videoFileLocalPath || !thumbnailLocalPath) {
         throw new APIError(400, "Video file and Thumbnail are required");
@@ -152,7 +152,11 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
     //TODO: get video by id
     if (!isValidObjectId(videoId)) {
-        throw new APIError(400, "Invalid video ID");
+        throw new APIError(400, "Invalid videoId");
+    }
+
+    if (!isValidObjectId(req.user?._id)) {
+        throw new APIError(400, "Invalid userId");
     }
 
     const video = await Video.aggregate([
@@ -182,7 +186,7 @@ const getVideoById = asyncHandler(async (req, res) => {
                 from: "users",
                 localField: "owner",
                 foreignField: "_id",
-                as: "videoOwner",
+                as: "owner",
                 pipeline: [
                     {
                         $lookup: {
@@ -199,7 +203,7 @@ const getVideoById = asyncHandler(async (req, res) => {
                             },
                             isSubscriber: {
                                 $cond: {
-                                    $if: {
+                                    if: {
                                         $in: [
                                             req.user?._id,
                                             "$subscribers.subscriber",
@@ -225,14 +229,14 @@ const getVideoById = asyncHandler(async (req, res) => {
         {
             $addFields: {
                 likes: {
-                    $size: "likes",
+                    $size: "$likes",
                 },
                 owner: {
-                    $first: "videoOwner",
+                    $first: "$owner",
                 },
                 isLiked: {
                     $cond: {
-                        $if: { $in: [req.user?._id, "$likes.likedBy"] },
+                        if: { $in: [req.user?._id, "$likes.likedBy"] },
                         then: true,
                         else: false,
                     },
@@ -260,22 +264,22 @@ const getVideoById = asyncHandler(async (req, res) => {
     }
 
     //increment the video views
-    await Video.findByIdAndUpdate(videoId, [
+    await Video.findByIdAndUpdate(videoId, 
         {
             $inc: {
                 views: 1,
             },
         },
-    ]);
+    );
 
     //add this video to the watch history
-    await User.findByIdAndUpdate(videoId, [
+    await User.findByIdAndUpdate(req.user?._id, 
         {
             $addToSet: {
                 watchHistory: videoId,
             },
         },
-    ]);
+    );
 
     return res
         .status(200)
@@ -285,6 +289,8 @@ const getVideoById = asyncHandler(async (req, res) => {
 const updateVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body;
     const { videoId } = req.params;
+
+    // console.log(title, description, videoId);
     //TODO: update video details like title, description, thumbnail
 
     if (!isValidObjectId(videoId)) {
@@ -297,6 +303,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
     const video = await Video.findById(videoId);
 
+    // console.log(video);
     if (!video) {
         throw new APIError(404, "video not found");
     }
@@ -307,7 +314,8 @@ const updateVideo = asyncHandler(async (req, res) => {
 
     const thumbnailToDelete = video.thumbnail.public_id;
 
-    const thumbnailLocalPath = req.file?.thumbnail[0].path;
+    const thumbnailLocalPath = req.file?.path; //if we are sending two media files, we add thumbnail[0] after files (meaning two files)
+    // here we use file meaning only one file
 
     if (!thumbnailLocalPath) {
         throw new APIError(400, "thumbnail is required");

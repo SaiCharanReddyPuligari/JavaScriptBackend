@@ -128,7 +128,7 @@ const updateTweet = asyncHandler(async (req, res) => {
         throw new APIError(400, "Only owner can update the tweet");
     }
 
-    const updateTweet = await findByIdAndUpdate(
+    const updateTweet = await Tweet.findByIdAndUpdate(
         tweetId,
         {
             $set: {

@@ -6,22 +6,113 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { APIError } from "../utils/APIErrors.js";
 import { Like } from "../models/like.models.js";
 
+//fetch the comments for the video using the videoId
+
+// const getVideoComments = asyncHandler(async (req, res) => {
+//     const { videoId } = req.params;
+//     const { page = 1, limit = 10 } = req.query;
+
+//     const video = await Video.findById(videoId);
+
+//     if (!video) {
+//         throw new APIError(404, "video does not exist");
+//     }
+
+//     const commentsAggregate = await Comment.aggregate([
+//         {
+//             $match: {
+//                 video: new mongoose.Types.ObjectId(videoId),
+//             },
+//         },
+//         {
+//             $lookup: {
+//                 from: "users",
+//                 localField: "owner",
+//                 foreignField: "_id",
+//                 as: "owner",
+//             },
+//         },
+//         {
+//             $lookup: {
+//                 from: "likes",
+//                 localField: "_id",
+//                 foreignField: "comment",
+//                 as: "likes",
+//             },
+//         },
+//         {
+//             $addFields: {
+//                 likesCount: {
+//                     $size: "$likes",
+//                 },
+//                 owner: {
+//                     $first: "$owner",
+//                 },
+//                 isLikedByUser: {
+//                     $cond: {
+//                         if: { $in: [req.user?._id, "$likes.likedBy"] },
+//                         then: true,
+//                         else: false,
+//                     },
+//                 },
+//             },
+//         },
+//         {
+//             $sort: {
+//                 createdAt: -1,
+//             },
+//         },
+//         {
+//             $project: {
+//                 content: 1,
+//                 createdAt: 1,
+//                 likesCount: 1,
+//                 owner: {
+//                     username: 1,
+//                     fullName: 1,
+//                     "avatar.url": 1,
+//                 },
+//                 isLikedByUser: 1,
+//             },
+//         },
+//     ]);
+
+//     const options = {
+//         page: parseInt(page, 10),
+//         limit: parseInt(limit, 10),
+//     };
+
+//     const comments = await Comment.aggregatePaginate({
+//         commentsAggregate,
+//         options,
+//     });
+
+//     console.log(comments);
+
+//     return res
+//         .status(200)
+//         .json(
+//             new APIResponse(
+//                 200,
+//                 comments,
+//                 "video comments fetched successfully"
+//             )
+//         );
+// });
 const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
     const { page = 1, limit = 10 } = req.query;
 
-    const videoID = await Video.findById(videoId);
+    const video = await Video.findById(videoId);
 
-    if (!videoID) {
-        throw new APIError(400, "video does not exist");
+    if (!video) {
+        throw new APIError(404, "Video not found");
     }
 
-    const videoComments = await Comment.aggregate([
+    const commentsAggregate = Comment.aggregate([
         {
             $match: {
-                //_id: req.user._id  //this returns a string not the id, but for normal methods, mongoose internally converts
-                //and here we cannot use it
-                video_id: new mongoose.Types.ObjectId(videoID),
+                video: new mongoose.Types.ObjectId(videoId),
             },
         },
         {
@@ -48,9 +139,9 @@ const getVideoComments = asyncHandler(async (req, res) => {
                 owner: {
                     $first: "$owner",
                 },
-                isLikedByUser: {
+                isLiked: {
                     $cond: {
-                        $if: { $in: [req.user?._id, "$likes.likedBy"] },
+                        if: { $in: [req.user?._id, "$likes.likedBy"] },
                         then: true,
                         else: false,
                     },
@@ -58,38 +149,38 @@ const getVideoComments = asyncHandler(async (req, res) => {
             },
         },
         {
+            $sort: {
+                createdAt: -1,
+            },
+        },
+        {
             $project: {
-                commentsCount: 1,
+                content: 1,
+                createdAt: 1,
                 likesCount: 1,
                 owner: {
                     username: 1,
                     fullName: 1,
-                    avatar: 1,
+                    "avatar.url": 1,
                 },
-                isLikedByUser: 1,
+                isLiked: 1,
             },
         },
     ]);
 
     const options = {
-        page,
-        limit,
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
     };
 
-    const videoCommentsPaginate = await Comment.aggregatePaginate({
-        videoComments,
-        options,
-    });
+    const comments = await Comment.aggregatePaginate(
+        commentsAggregate,
+        options
+    );
 
     return res
         .status(200)
-        .json(
-            new APIResponse(
-                200,
-                videoCommentsPaginate,
-                "video comments fetched successfully"
-            )
-        );
+        .json(new APIResponse(200, comments, "Comments fetched successfully"));
 });
 
 const addComment = asyncHandler(async (req, res) => {
@@ -119,7 +210,9 @@ const addComment = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(200, new APIResponse("Comment added successfully"));
+        .json(
+            new APIResponse(200, { addComment }, "Comment added successfully")
+        );
 });
 
 const updateComment = asyncHandler(async (req, res) => {
@@ -179,7 +272,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 
     await Like.deleteMany({
         comment: commentId,
-        likedBy: req.user
+        likedBy: req.user,
     });
 
     return res
