@@ -13,7 +13,7 @@ Here are the key points of how I used the `MEN` stack and `NPM` packages to buil
 -   JsonWebTokens to authenticate the users for both access and session cookies and tokens.
 -   Implementing production level practices to learn full-stack development in the best way possible.
 
-Checkout the [API Documentation(POSTMAN)](https://documenter.getpostman.com/view/31485938/2sA2r6Z5TL)
+Checkout the [API Documentation with POSTMAN](https://documenter.getpostman.com/view/31485938/2sA2r6Z5TL)
 
 ### Tech Stack:
 
