@@ -14,6 +14,7 @@ Here are the key points of how I used the `MEN` stack and `NPM` packages to buil
 -   Implementing production level practices to learn full-stack development in the best way possible.
 
 Checkout the [API Documentation with POSTMAN](https://documenter.getpostman.com/view/31485938/2sA2r6Z5TL)
+Checkout the [Models](https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj)
 
 ### Tech Stack:
 
