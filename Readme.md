@@ -6,12 +6,12 @@ This is a `JavaScript Backend project` to understand the functionalities of `Mon
 
 ---
 
-Here are the key points of how I used the `MEN` stack and `NPM` packages to build it.
+Here are the key points of how I used the `MERN` stack and `NPM` packages to build it.
 
 -   Node.js for the backend code and running the Express server inside the node.js environment.
 -   MongoDB to store the data using CURD principles and retrieve the required data with aggregation pipelines.
 -   JsonWebTokens to authenticate the users for both access and session cookies and tokens.
--   Implementing production level practices to learn full-stack development in the best way possible.
+-   Implementing production-level practices to learn full-stack development in the best way possible.
 
 Checkout the [API Documentation with POSTMAN](https://documenter.getpostman.com/view/31485938/2sA2r6Z5TL)
 Checkout the [Models](https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj)
